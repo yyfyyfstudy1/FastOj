@@ -68,11 +68,27 @@ public class JudgeServiceImpl implements JudgeService {
         if (!updateState) {
             throw new BusinessException(ErrorCode.SYSTEM_ERROR, "题目状态更新失败");
         }
-        //4、调用沙箱，获取到执行结果
+        //4、调用沙箱
         CodeSandBox codeSandbox = CodeSandboxFactory.newInstance(judgeType);
         codeSandbox = new CodeSandBoxProxy(codeSandbox);
         String submitLanguage = questionSubmit.getSubmitLanguage();
+
+        // 用户提交的代码
         String submitCode = questionSubmit.getSubmitCode();
+
+        // TODO 拼接主函数和包
+        String imports =
+                "import java.util.*;\n" +
+                        "import java.util.concurrent.*;\n" + // 包含并发集合
+                        "import java.util.function.*;\n" + // 包含函数式接口
+                        "import java.util.stream.*;\n" + // 包含Stream API
+                        "import java.util.regex.*;\n"; // 包含正则表达式类
+        String mainFunction = question.getMainFunction();
+
+        // 使用正则表达式查找类定义的结束大括号，并在其前插入 main 方法
+        String fullCode = imports + submitCode.replaceAll("(\\}\\s*$)", mainFunction + "$1");
+
+
         // 获取输入用例
         String judgeCaseStr = question.getJudgeCase();
         List<JudgeCase> judgeCasesList = JSONUtil.toList(judgeCaseStr, JudgeCase.class);
@@ -80,10 +96,12 @@ public class JudgeServiceImpl implements JudgeService {
         List<String> inputList = judgeCasesList.stream().map(JudgeCase::getInput).collect(Collectors.toList());
         // 调用沙箱
         ExecuteCodeRequest executeCodeRequest = ExecuteCodeRequest.builder()
-                .code(submitCode)
+                .code(fullCode)
                 .language(submitLanguage)
                 .inputList(inputList)
+                .mainFunction(mainFunction)
                 .build();
+        // 获取到代码沙箱执行结果
         ExecuteCodeResponse executeCodeResponse = codeSandbox.executeCode(executeCodeRequest);
         List<String> outputList = executeCodeResponse.getOutputList();
         // 5、根据沙箱的执行结果，设置题目的判题状态和信息
@@ -94,7 +112,8 @@ public class JudgeServiceImpl implements JudgeService {
         judgeContext.setJudgeCaseList(judgeCasesList);
         judgeContext.setQuestion(question);
         judgeContext.setQuestionSubmit(questionSubmit);
-        // 进入到代码沙箱，执行程序，返回执行结果
+
+        // 获取判题结果
         JudgeInfo judgeInfo = judgeManager.doJudge(judgeContext);
         // 6、修改判题结果
         updateQuestionSubmit = new QuestionSubmit();

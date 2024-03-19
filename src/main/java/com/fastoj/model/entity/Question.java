@@ -96,4 +96,14 @@ public class Question implements Serializable {
 
     @TableField(exist = false)
     private static final long serialVersionUID = 1L;
+
+    /**
+     * 主函数
+     */
+    private String mainFunction;
+
+    /**
+     * 展示给用户的函数
+     */
+    private String userFunction;
 }

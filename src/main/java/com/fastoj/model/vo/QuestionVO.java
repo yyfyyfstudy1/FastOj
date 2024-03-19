@@ -73,10 +73,22 @@ public class QuestionVO implements Serializable {
      */
     private Date createTime;
 
+
     /**
      * 更新时间
      */
     private Date updateTime;
+
+    /**
+     * 主函数
+     */
+    private String mainFunction;
+
+    /**
+     * 展示给用户的函数
+     */
+    private String userFunction;
+
 
     /**
      * 用户封装类

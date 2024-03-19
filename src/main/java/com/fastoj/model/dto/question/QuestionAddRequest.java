@@ -33,6 +33,16 @@ public class QuestionAddRequest implements Serializable {
     private String answer;
 
     /**
+     * 主函数
+     */
+    private String mainFunction;
+
+    /**
+     * 展示给用户的函数
+     */
+    private String userFunction;
+
+    /**
      * 判题用例
      */
     private List<JudgeCase> judgeCase;
