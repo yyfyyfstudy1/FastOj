@@ -45,7 +45,20 @@ public class JavaLanguageJudgeStrategy implements JudgeStrategy {
         // 依次判断每一项输出和预期输出是否相等
         for (int i = 0; i < judgeCaseList.size(); i++) {
             JudgeCase judgeCase = judgeCaseList.get(i);
-            if (!judgeCase.getOutput().equals(outputList.get(i))) {
+
+            // 对一个测试用例有多个解的处理
+            String[] multipleResult = splitInput(judgeCase.getOutput());
+
+            boolean judgeFlag = false;
+            for (String stringUse: multipleResult){
+                // 存在其中一个解与输出相同
+                if (stringUse.equals(outputList.get(i))) {
+                    judgeFlag = true;
+                   break;
+                }
+            }
+            // 如果多个解中都没有匹配的答案
+            if (!judgeFlag) {
                 judgeInfoMessageEnum = JudgeInfoMessageEnum.WRONG_ANSWER;
                 judgeInfoResponse.setMessage(judgeInfoMessageEnum.getValue());
                 return judgeInfoResponse;
@@ -70,5 +83,16 @@ public class JavaLanguageJudgeStrategy implements JudgeStrategy {
         }
         judgeInfoResponse.setMessage(judgeInfoMessageEnum.getValue());
         return judgeInfoResponse;
+    }
+
+    public  String[] splitInput(String input) {
+        // 检查字符串是否包含'&&'
+        if (input.contains("&&")) {
+            // 如果包含，则进行分割
+            return input.split("&&");
+        } else {
+            // 如果不包含，返回包含原始字符串的数组
+            return new String[] { input };
+        }
     }
 }

@@ -1,6 +1,8 @@
 package com.fastoj.controller;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.fastoj.model.dto.questionsumbit.QuestionStatusCheck;
 import com.google.gson.Gson;
 import com.fastoj.annotation.AuthCheck;
 import com.fastoj.common.BaseResponse;
@@ -25,11 +27,14 @@ import com.fastoj.service.UserService;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 题目管理
@@ -334,6 +339,22 @@ public class QuestionController {
     }
 
     /**
+     * 查看question提交的状态
+     */
+    @PostMapping("/question_submit/getQuestionSubmitStatus")
+    @ApiOperation(value = "题目提交状态查询")
+    public BaseResponse<Integer> getQuestionSubmitStatus(@RequestBody QuestionStatusCheck questionStatusCheck,
+                                               HttpServletRequest request) {
+
+        QuestionSubmit questionSubmit = questionSubmitService.getById(questionStatusCheck.getQuestionId());
+
+
+        return ResultUtils.success(questionSubmit.getSubmitState());
+    }
+
+
+
+    /**
      * 分页获取题目提交列表（除了管理员外，其他普通用户只能看到非答案、提交的代码等公开信息）
      *
      * @param questionSubmitQueryRequest
@@ -353,5 +374,35 @@ public class QuestionController {
         final User loginUer = userService.getLoginUser(request);
         // 返回脱敏信息
         return ResultUtils.success(questionSubmitService.getQuestionSubmitVOPage(questionSubmitPage, loginUer));
+    }
+
+    @PostMapping("/question_submit/listUserSubmission/page")
+    @ApiOperation(value = "分页获取用户题目提交列表")
+    public BaseResponse<Page<QuestionSubmitVO>> listUserSubmission(@RequestBody QuestionSubmitQueryRequest questionSubmitQueryRequest,
+                                                                 HttpServletRequest request) {
+        long current = questionSubmitQueryRequest.getCurrent();
+        long pageSize = questionSubmitQueryRequest.getPageSize();
+        final User loginUer = userService.getLoginUser(request);
+
+
+        LambdaQueryWrapper<QuestionSubmit> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+        lambdaQueryWrapper.eq(QuestionSubmit::getUserId, loginUer.getId());
+        lambdaQueryWrapper.eq(QuestionSubmit::getQuestionId, questionSubmitQueryRequest.getQuestionId());
+        lambdaQueryWrapper.orderByDesc(QuestionSubmit::getCreateTime);
+
+        // 从数据库中查询到原始的题目提交信息
+        Page<QuestionSubmit> questionSubmitPage = questionSubmitService.page(new Page<>(current, pageSize),
+                lambdaQueryWrapper);
+
+        // 转换Page<QuestionSubmit>到Page<QuestionSubmitVO>
+        List<QuestionSubmitVO> vos = questionSubmitPage.getRecords().stream()
+                .map(QuestionSubmitVO::objToVo) // 使用转换方法
+                .collect(Collectors.toList());
+
+        // 创建一个新的Page对象来包含VOs
+        Page<QuestionSubmitVO> voPage = new Page<>(questionSubmitPage.getCurrent(), questionSubmitPage.getSize(), questionSubmitPage.getTotal());
+        voPage.setRecords(vos);
+
+        return ResultUtils.success(voPage);
     }
 }
