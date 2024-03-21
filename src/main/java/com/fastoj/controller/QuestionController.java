@@ -2,7 +2,10 @@ package com.fastoj.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.fastoj.model.dto.questionsumbit.CommentDto;
 import com.fastoj.model.dto.questionsumbit.QuestionStatusCheck;
+import com.fastoj.model.entity.Comment;
+import com.fastoj.service.CommentService;
 import com.google.gson.Gson;
 import com.fastoj.annotation.AuthCheck;
 import com.fastoj.common.BaseResponse;
@@ -33,7 +36,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -58,6 +61,9 @@ public class QuestionController {
 
     @Resource
     private RedisLimiterManager redissonLimiter;
+
+    @Resource
+    private CommentService commentService;
 
     private final static Gson GSON = new Gson();
 
@@ -404,5 +410,58 @@ public class QuestionController {
         voPage.setRecords(vos);
 
         return ResultUtils.success(voPage);
+    }
+
+
+
+    @PostMapping("/question/comment/tree")
+    @ApiOperation(value = "获取评论列表")
+    public BaseResponse<List<Comment>> listComment(@RequestBody CommentDto useDto,
+                                                                   HttpServletRequest request) {
+
+        LambdaQueryWrapper<Comment> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+        lambdaQueryWrapper.eq(Comment::getQuestionId, useDto.getQuestionId());
+        List<Comment> commentList = commentService.list(lambdaQueryWrapper);
+
+
+        Map<Long, Comment> commentMap = new HashMap<>();
+        List<Comment> rootComments = new ArrayList<>();
+
+        // 首先，将所有评论放入Map中，便于后续快速查找
+        for (Comment comment : commentList) {
+            User user = userService.getById(comment.getUserId());
+            comment.setUserName(user.getUserName());
+            comment.setUserAvatar(user.getUserAvatar());
+            commentMap.put(comment.getId(), comment);
+        }
+
+        // 然后，组织评论的树状结构
+        for (Comment comment : commentList) {
+            if (comment.getParentCommentId() != null && comment.getParentCommentId() != 0) {
+                Comment parent = commentMap.get(comment.getParentCommentId());
+                if (parent != null) {
+                    parent.getChildren().add(comment);
+                }
+            } else {
+                rootComments.add(comment); // 没有父评论的是根评论
+            }
+        }
+
+        return ResultUtils.success(rootComments);
+    }
+
+
+    @PostMapping("/addComment")
+    @ApiOperation(value = "添加评论")
+    public BaseResponse<Boolean> addComment(@RequestBody Comment comment, HttpServletRequest request) {
+        final User loginUer = userService.getLoginUser(request);
+        comment.setCreateTime(new Date());
+        comment.setUserId(loginUer.getId());
+
+        if(comment.getParentCommentId()!=0){
+            Comment parentComment = commentService.getById(comment.getParentCommentId());
+            comment.setQuestionId(parentComment.getQuestionId());
+        }
+        return ResultUtils.success(commentService.save(comment));
     }
 }
