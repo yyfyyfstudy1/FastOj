@@ -2,6 +2,7 @@ package com.fastoj.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.fastoj.common.ErrorCode;
 import com.fastoj.constant.CommonConstant;
@@ -44,6 +45,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     @Resource
     private UserCodeService userCodeService;
+
+    @Resource
+    private UserMapper userMapper;
 
     @Override
     public long userRegister(String userAccount, String userPassword, String checkPassword) {
@@ -338,5 +342,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
             return user.getId();
         }
+    }
+
+    @Override
+    public Page<User> listTopUser(Page<User> page) {
+
+        return userMapper.listTopUser(page);
     }
 }

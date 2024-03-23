@@ -1,6 +1,7 @@
 package com.fastoj.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.fastoj.model.dto.user.UserAddRequest;
 import com.fastoj.model.dto.user.UserQueryRequest;
@@ -111,4 +112,7 @@ public interface UserService extends IService<User> {
     QueryWrapper<User> getQueryWrapper(UserQueryRequest userQueryRequest);
 
     long addUser(UserAddRequest userAddRequest);
+
+
+    Page<User> listTopUser(Page<User> page);
 }

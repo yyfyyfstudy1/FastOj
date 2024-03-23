@@ -2,6 +2,7 @@ package com.fastoj.mapper;
 
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.fastoj.model.entity.User;
 
 /**
@@ -12,6 +13,7 @@ import com.fastoj.model.entity.User;
 */
 public interface UserMapper extends BaseMapper<User> {
 
+    Page<User> listTopUser(Page<User> page);
 }
 
 

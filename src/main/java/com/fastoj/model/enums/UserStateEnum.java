@@ -13,9 +13,9 @@ import java.util.stream.Collectors;
  */
 public enum UserStateEnum {
 
-    NORMAL("正常", "0"),
-    LOGOUT("注销", "1"),
-    BAN("封号", "2");
+    NORMAL("normal", "0"),
+    LOGOUT("Log out", "1"),
+    BAN("title", "2");
 
     private final String text;
 

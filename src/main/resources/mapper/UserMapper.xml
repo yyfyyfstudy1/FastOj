@@ -28,4 +28,26 @@
         userState,userCode,userRole,
         createTime,updateTime,isDelete
     </sql>
+    <select id="listTopUser" resultType="com.fastoj.model.entity.User">
+        SELECT
+            u.*,
+            que.questionPass,
+            RANK() OVER (ORDER BY que.questionPass DESC) AS userRank
+        FROM
+            user u
+                LEFT JOIN
+            (SELECT
+                 que.userId,
+                 COUNT(DISTINCT que.questionId) AS questionPass
+             FROM
+                 question_submit que
+             WHERE
+                 que.submitState = 2
+             GROUP BY
+                 que.userId) que
+            ON u.id = que.userId
+        ORDER BY
+            que.questionPass DESC
+
+    </select>
 </mapper>

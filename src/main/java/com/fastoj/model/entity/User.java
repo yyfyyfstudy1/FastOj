@@ -88,5 +88,11 @@ public class User implements Serializable {
     private Integer isDelete;
 
     @TableField(exist = false)
+    private Integer questionPass;
+
+    @TableField(exist = false)
+    private Integer userRank;
+
+    @TableField(exist = false)
     private static final long serialVersionUID = 1L;
 }

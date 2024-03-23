@@ -464,4 +464,19 @@ public class QuestionController {
         }
         return ResultUtils.success(commentService.save(comment));
     }
+
+
+    @PostMapping("/user/topUser/page")
+    @ApiOperation(value = "分页获取top用户")
+    public BaseResponse<Page<User>> listTopUser(@RequestBody QuestionSubmitQueryRequest questionSubmitQueryRequest,
+                                                                         HttpServletRequest request) {
+        long current = questionSubmitQueryRequest.getCurrent();
+        long pageSize = questionSubmitQueryRequest.getPageSize();
+
+        Page<User> page = new Page<>(current, pageSize);
+
+
+        page =  userService.listTopUser(page);
+        return ResultUtils.success(page);
+    }
 }
