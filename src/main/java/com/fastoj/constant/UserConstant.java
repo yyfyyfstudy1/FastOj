@@ -37,5 +37,5 @@ public interface UserConstant {
      * 默认头像
      */
     //String USER_DEFAULT_AVATAR = "https://p3-passport.byteimg.com/img/user-avatar/2ea9106b748a0b88d5bfcf517a4dc2ef~180x180.awebp";
-    String USER_DEFAULT_AVATAR = "https://shierimages.oss-cn-shenzhen.aliyuncs.com/TyporaImages/46.jpg";
+    String USER_DEFAULT_AVATAR = "https://a.520gexing.com/uploads/allimg/2021042109/ybzn22eb5ew.jpg";
 }

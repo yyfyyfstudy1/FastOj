@@ -26,7 +26,7 @@ public class RemoteCodeSandbox implements CodeSandBox {
         System.out.println("远程代码沙箱");
         // todo 修改成线上的接口
         // String url = "http://localhost:8081/executeCode";
-        String url = "http://localhost:8082/executeCode";
+        String url = "http://127.0.0.1:8082/executeCode";
         String json = JSONUtil.toJsonStr(executeCodeRequest);
         String responseStr = HttpUtil.createPost(url)
                .header(AUTH_REQUEST_HEADER, AUTH_REQUEST_SECRET)

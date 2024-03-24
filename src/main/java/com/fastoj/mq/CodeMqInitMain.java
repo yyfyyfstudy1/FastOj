@@ -22,8 +22,8 @@ public class CodeMqInitMain {
     public static void doInitCodeMq() {
         try {
             ConnectionFactory factory = new ConnectionFactory();
-            // todo 配置远程服务MQ信息
-            factory.setHost("192.168.52.163");
+            // todo 配置远程服务MQ信息http://129.226.84.238/
+            factory.setHost("129.226.84.238");
             factory.setPassword("rdhl@1234");
             factory.setUsername("admin");
             Connection connection = factory.newConnection();
