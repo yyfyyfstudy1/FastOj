@@ -1,4 +1,4 @@
-### 单体项目目录结构
+### Project directory structure
 
 ```
 ├─sql  // Project SQL files: Create database and data tables
@@ -37,3 +37,6 @@
       └─resources // Project resource allocation
           └─mapper
 ```
+
+### Project screenshots
+
